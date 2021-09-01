@@ -1,0 +1,143 @@
+package handler;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import data.DataManager;
+import main.Main;
+
+public class Taxi {
+	DataManager data = Main.data;
+	FileConfiguration file = data.getFile();
+
+	public void makeTaxiTicket(Player p) {
+		ItemStack item = p.getInventory().getItemInMainHand();
+		if (item == null || item.getType() == Material.AIR) {
+			p.sendMessage(ChatColor.RED + "맨손으로는 이 커맨드를 사용할 수 없습니다.");
+			return;
+		}
+		file.set("ticket.item", item);
+		data.saveConfig();
+		p.sendMessage(ChatColor.GREEN + "성공적으로 티켓 아이템이 등록되었습니다.");
+	}
+
+	public void setTaxiLocation(Player p, int num) {
+		if (num == 1) {
+			Location loc = p.getLocation();
+			Set<String> keys = file.getConfigurationSection("main_taxiLocation").getKeys(false);
+			Iterator<String> iter = keys.iterator();
+			int cnt = 0;
+			while (iter.hasNext()) {
+				String key = iter.next();
+				if (cnt == 1 && key == null) {
+					cnt = 1;
+					break;
+				}
+				cnt++;
+			}
+			file.set("main_taxiLocation." + cnt, loc);
+			data.saveConfig();
+			p.sendMessage(ChatColor.GREEN + "현재위치가 (메인)택시호출 장소로 지정되었습니다.");
+		}else if(num == 2) {
+			Location loc = p.getLocation();
+			Set<String> keys = file.getConfigurationSection("deco_taxiLocation").getKeys(false);
+			Iterator<String> iter = keys.iterator();
+			int cnt = 0;
+			while (iter.hasNext()) {
+				String key = iter.next();
+				if (cnt == 1 && key == null) {
+					cnt = 1;
+					break;
+				}
+				cnt++;
+			}
+			file.set("deco_taxiLocation." + cnt, loc);
+			data.saveConfig();
+			p.sendMessage(ChatColor.GREEN + "현재위치가 (데코)택시호출 장소로 지정되었습니다.");
+		}
+	}
+	public void listTaxiLocation(Player p) {
+		Set<String> keys = file.getConfigurationSection("main_taxiLocation").getKeys(false);
+		Iterator<String> iter = keys.iterator();
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		p.sendMessage(ChatColor.WHITE + "" + ChatColor.BOLD + "                   <(메인)택시위치 목록>                   ");
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		while (iter.hasNext()) {
+			String key = iter.next();
+			Location loc = (Location) file.get("main_taxiLocation." + key);
+			p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + key + ChatColor.GREEN + "이 생성된 좌표 - " + "x : "
+					+ loc.getX() + " y : " + loc.getY() + " z : " + loc.getZ());
+		}
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		keys = file.getConfigurationSection("deco_taxiLocation").getKeys(false);
+		iter = keys.iterator();
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		p.sendMessage(ChatColor.WHITE + "" + ChatColor.BOLD + "                   <(데코)택시위치 목록>                   ");
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		while (iter.hasNext()) {
+			String key = iter.next();
+			Location loc = (Location) file.get("deco_taxiLocation." + key);
+			p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + key + ChatColor.GREEN + "이 생성된 좌표 - " + "x : "
+					+ loc.getX() + " y : " + loc.getY() + " z : " + loc.getZ());
+		}
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+	}
+
+	public void deleteTaxiLocation(Player p, int num) {
+		Set<String> main_keys = file.getConfigurationSection("main_taxiLocation").getKeys(false);
+		Iterator<String> main_iter = main_keys.iterator();
+		Set<String> deco_keys = file.getConfigurationSection("deco_taxiLocation").getKeys(false);
+		Iterator<String> deco_iter = deco_keys.iterator();
+		if(main_keys.size() != deco_keys.size()) { // 메인 택시 수랑 데코 택시의 수가 동일하지 않을 때
+			p.sendMessage(ChatColor.RED + "메인 택시의 숫자랑 데코 택시의 숫자가 동일하지 않아 삭제가 불가능합니다.");
+			return;
+		}
+		if (main_keys.size() < num) { // 번호를 큰 경우를 입력할 때
+			p.sendMessage(ChatColor.RED + "번호를 확인하시고 다시 입력해주세요.");
+			return;
+		}
+		file.set("main_taxiLocation." + num, null);
+		file.set("deco_taxiLocation." + num, null);
+		data.saveConfig();
+		ArrayList<Location> locArr = new ArrayList<Location>();
+		while (main_iter.hasNext()) { // main 택시 처리
+			int key = Integer.parseInt(main_iter.next());
+			if (key > num) { // 삭제 후 다시 정렬
+				locArr.add((Location) file.get("main_taxiLocation." + key));
+				file.set("main_taxiLocation." + key, null);
+				data.saveConfig();
+			}
+		}
+		int cnt = num + 1;
+		for (int i = 0; i < locArr.size(); i++) {
+			file.set("main_taxiLocation." + cnt, locArr.get(i));
+			data.saveConfig();
+			cnt++;
+		}
+		
+		locArr.clear();
+		while (deco_iter.hasNext()) { // deco 택시 처리
+			int key = Integer.parseInt(deco_iter.next());
+			if (key > num) { // 삭제 후 다시 정렬
+				locArr.add((Location) file.get("deco_taxiLocation." + key));
+				file.set("deco_taxiLocation." + key, null);
+				data.saveConfig();
+			}
+		}
+		cnt = num + 1;
+		for (int i = 0; i < locArr.size(); i++) {
+			file.set("deco_taxiLocation." + cnt, locArr.get(i));
+			data.saveConfig();
+			cnt++;
+		}
+		p.sendMessage(ChatColor.GREEN + "성공적으로 위치 좌표를 제거하였습니다.");
+	}
+}

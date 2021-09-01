@@ -1,0 +1,12 @@
+name: Taxi
+main: taxi.main.Main
+version: 1.0
+api-version: 1.12.2
+author: forceTlight
+commands:
+ 택시설정:
+  usage: /<command>
+ 택시호출:
+   usage: /<command>
+ 강제택시호출중단:
+   usage: /<command>

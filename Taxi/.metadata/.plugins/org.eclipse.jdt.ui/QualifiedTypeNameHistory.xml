@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="main.Main"/>
+    <fullyQualifiedTypeName name="data.DataManager"/>
+    <fullyQualifiedTypeName name="org.bukkit.entity.EntityType"/>
+    <fullyQualifiedTypeName name="org.bukkit.util.EulerAngle"/>
+    <fullyQualifiedTypeName name="org.bukkit.World"/>
+    <fullyQualifiedTypeName name="taxi.data.DataManager"/>
+    <fullyQualifiedTypeName name="taxi.main.Main"/>
+    <fullyQualifiedTypeName name="org.bukkit.configuration.file.FileConfiguration"/>
+    <fullyQualifiedTypeName name="org.bukkit.Bukkit"/>
+    <fullyQualifiedTypeName name="java.lang.System"/>
+    <fullyQualifiedTypeName name="java.text.Format"/>
+    <fullyQualifiedTypeName name="org.apache.commons.io.monitor.FileEntry"/>
+    <fullyQualifiedTypeName name="org.bukkit.boss.BarColor"/>
+    <fullyQualifiedTypeName name="org.bukkit.boss.BarStyle"/>
+    <fullyQualifiedTypeName name="org.bukkit.boss.BossBar"/>
+    <fullyQualifiedTypeName name="org.bukkit.scheduler.BukkitScheduler"/>
+    <fullyQualifiedTypeName name="java.lang.Runnable"/>
+    <fullyQualifiedTypeName name="java.util.HashMap"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.block.Action"/>
+    <fullyQualifiedTypeName name="org.bukkit.entity.Entity"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.player.PlayerInteractEntityEvent"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.player.PlayerInteractEvent"/>
+    <fullyQualifiedTypeName name="org.bukkit.Material"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.player.PlayerInteractAtEntityEvent"/>
+    <fullyQualifiedTypeName name="org.bukkit.Location"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.player.PlayerQuitEvent"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.EventHandler"/>
+    <fullyQualifiedTypeName name="org.bukkit.event.player.PlayerMoveEvent"/>
+    <fullyQualifiedTypeName name="org.bukkit.entity.ArmorStand"/>
+    <fullyQualifiedTypeName name="org.bukkit.ChatColor"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="java.util.UUID"/>
+    <fullyQualifiedTypeName name="java.util.Iterator"/>
+    <fullyQualifiedTypeName name="net.md_5.bungee.api.chat.TextComponent"/>
+    <fullyQualifiedTypeName name="net.md_5.bungee.api.ChatMessageType"/>
+    <fullyQualifiedTypeName name="taxi.event.TaxiEventManager"/>
+    <fullyQualifiedTypeName name="org.bukkit.inventory.ItemStack"/>
+</qualifiedTypeNameHistroy>

@@ -1,0 +1,4 @@
+INDEX VERSION 1.131+D:\코딩\마인크래프트\Taxi\.metadata\.plugins\org.eclipse.jdt.core
+859357456.index
+2112246634.index
+3845375543.index

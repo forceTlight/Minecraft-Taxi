@@ -1,0 +1,250 @@
+package taxi.handler;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.EulerAngle;
+
+import taxi.data.DataManager;
+import taxi.main.Main;
+
+public class Taxi {
+	DataManager data = Main.data;
+	FileConfiguration file = data.getFile();
+
+	public void makeTaxiTicket(Player p) { // 택시 티켓 호출 메서드
+		ItemStack item = p.getInventory().getItemInMainHand();
+		if (item == null || item.getType() == Material.AIR) {
+			p.sendMessage(ChatColor.RED + "맨손으로는 이 커맨드를 사용할 수 없습니다.");
+			return;
+		}
+		file.set("ticket.item", item);
+		data.saveConfig();
+		p.sendMessage(ChatColor.GREEN + "성공적으로 티켓 아이템이 등록되었습니다.");
+	}
+
+	public void setTaxiLocation(Player p, int num) { // 택시 호출 및 위치 저장 메서드
+		if (num == 1) {
+			// 아머스탠드 생성
+			ItemStack headItem = file.getItemStack("main_taxi.item");
+			ArmorStand armorStand = (ArmorStand) p.getWorld().spawnEntity(p.getLocation(), EntityType.ARMOR_STAND);
+			UUID uuid = armorStand.getUniqueId();
+			Location look = p.getLocation().subtract(armorStand.getLocation());
+			EulerAngle poseAngle = directionToEuler(look);
+			armorStand.setHeadPose(poseAngle);
+			armorStand.setBasePlate(false);
+			armorStand.setInvulnerable(true);
+			armorStand.setHelmet(headItem);
+			armorStand.setGravity(false);
+			// 홀로그램 1 생성
+			ArmorStand hologram1 = (ArmorStand) p.getWorld().spawnEntity(p.getLocation().add(0, 1.0 , 0),
+					EntityType.ARMOR_STAND);
+			UUID hologram1_uuid = hologram1.getUniqueId();
+			String name = ChatColor.GOLD + " [ " + ChatColor.RED + "" + ChatColor.BOLD + "TAXI " + ChatColor.DARK_GRAY
+					+ "/ " + ChatColor.WHITE + "대기중" + ChatColor.GOLD + " ] ";
+			hologram1.setVisible(false);
+			hologram1.setCustomNameVisible(true);
+			hologram1.setInvulnerable(true);
+			hologram1.setCustomName(name);
+			hologram1.setGravity(false);
+			// 홀로그램 2 생성
+			ArmorStand hologram2 = (ArmorStand) p.getWorld().spawnEntity(p.getLocation().add(0, 1.5, 0),
+					EntityType.ARMOR_STAND);
+			UUID hologram2_uuid = hologram1.getUniqueId();
+			name = ChatColor.GOLD + " [ " + ChatColor.RED + "" + ChatColor.BOLD + "TAXI " + ChatColor.DARK_GRAY
+					+ "/ " + ChatColor.WHITE + "대기중" + ChatColor.GOLD + " ] ";
+			hologram2.setVisible(false);
+			hologram2.setCustomNameVisible(true);
+			hologram2.setInvulnerable(true);
+			hologram2.setCustomName(name);
+			hologram2.setGravity(false);
+			// 메인택시 위치 data.yml에 저장
+			Location loc = p.getLocation();
+			int cnt = 1;
+			if (file.contains("main_taxiLocation")) {
+				Set<String> keys = file.getConfigurationSection("main_taxiLocation").getKeys(false);
+				Iterator<String> iter = keys.iterator();
+				while (iter.hasNext()) {
+					String key = iter.next();
+					cnt++;
+				}
+			} else {
+				cnt = 1;
+			}
+			file.set("main_taxiLocation." + cnt + ".loc", loc);
+			data.saveConfig();
+			file.set("main_taxiLocation." + cnt + ".uuid", uuid.toString());
+			data.saveConfig();
+			p.sendMessage(ChatColor.GREEN + "현재위치가 (메인)택시호출 장소로 지정되었습니다.");
+		} else if (num == 2) {
+			ItemStack headItem = file.getItemStack("main_taxi.item");
+			ArmorStand armorStand = (ArmorStand) p.getWorld().spawnEntity(p.getLocation(), EntityType.ARMOR_STAND);
+			UUID uuid = armorStand.getUniqueId();
+			Location look = p.getLocation().subtract(armorStand.getLocation());
+			EulerAngle poseAngle = directionToEuler(look);
+			armorStand.setHeadPose(poseAngle);
+			armorStand.setSmall(true);
+			armorStand.setBasePlate(false);
+			armorStand.setInvulnerable(true);
+			armorStand.setHelmet(headItem); // 여기까지함
+
+			Location loc = p.getLocation();
+			int cnt = 1;
+			if (file.contains("deco_taxiLocation")) {
+				Set<String> keys = file.getConfigurationSection("deco_taxiLocation").getKeys(false);
+				Iterator<String> iter = keys.iterator();
+				while (iter.hasNext()) {
+					String key = iter.next();
+					cnt++;
+				}
+			} else {
+				cnt = 1;
+			}
+			file.set("deco_taxiLocation." + cnt + ".loc", loc);
+			data.saveConfig();
+			file.set("deco_taxiLocation." + cnt + ".uuid", uuid.toString());
+			data.saveConfig();
+			p.sendMessage(ChatColor.GREEN + "현재위치가 (데코)택시호출 장소로 지정되었습니다.");
+		}
+	}
+
+	public void listTaxiLocation(Player p) { // 택시 리스트 출력 메서드
+		Set<String> keys = file.getConfigurationSection("main_taxiLocation").getKeys(false);
+		Iterator<String> iter = keys.iterator();
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		p.sendMessage(ChatColor.WHITE + "" + ChatColor.BOLD + "                   <(메인)택시위치 목록>                   ");
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		while (iter.hasNext()) {
+			String key = iter.next();
+			Location loc = (Location) file.get("main_taxiLocation." + key + ".loc");
+			p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + key + ChatColor.GREEN + "이 생성된 좌표 - " + "x : "
+					+ loc.getX() + " y : " + loc.getY() + " z : " + loc.getZ());
+		}
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		keys = file.getConfigurationSection("deco_taxiLocation").getKeys(false);
+		iter = keys.iterator();
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		p.sendMessage(ChatColor.WHITE + "" + ChatColor.BOLD + "                   <(데코)택시위치 목록>                   ");
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+		while (iter.hasNext()) {
+			String key = iter.next();
+			Location loc = (Location) file.get("deco_taxiLocation." + key + ".loc");
+			p.sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + key + ChatColor.GREEN + "이 생성된 좌표 - " + "x : "
+					+ loc.getX() + " y : " + loc.getY() + " z : " + loc.getZ());
+		}
+		p.sendMessage(ChatColor.YELLOW + "-----------------------------------------------------------------");
+	}
+
+	public void deleteTaxiLocation(Player p, int num) { // 택시 위치 삭제 메서드
+		Set<String> main_keys = file.getConfigurationSection("main_taxiLocation").getKeys(false);
+		Iterator<String> main_iter = main_keys.iterator();
+		Set<String> deco_keys = file.getConfigurationSection("deco_taxiLocation").getKeys(false);
+		Iterator<String> deco_iter = deco_keys.iterator();
+		if (main_keys.size() != deco_keys.size() || (main_keys == null || deco_keys == null)) { // 메인 택시 수랑 데코 택시의 수가
+																								// 동일하지 않을 때
+			p.sendMessage(ChatColor.RED + "메인 택시의 숫자랑 데코 택시의 숫자가 동일하지 않아 삭제가 불가능합니다.");
+			return;
+		}
+		if (main_keys.size() < num) { // 번호를 큰 경우를 입력할 때
+			p.sendMessage(ChatColor.RED + "번호를 확인하시고 다시 입력해주세요.");
+			return;
+		}
+		String s = file.getString("main_taxiLocation." + num + ".uuid");
+		String s2 = s.replace("-", "");
+		UUID uuid = new UUID(new BigInteger(s2.substring(0, 16), 16).longValue(),
+				new BigInteger(s2.substring(16), 16).longValue());
+		for (World w : Bukkit.getWorlds()) {
+			for (Entity e : w.getEntities()) {
+				if (e.getUniqueId().equals(uuid))
+					e.remove();
+			}
+		}
+		s = file.getString("deco_taxiLocation." + num + ".uuid");
+		s2 = s.replace("-", "");
+		uuid = new UUID(new BigInteger(s2.substring(0, 16), 16).longValue(),
+				new BigInteger(s2.substring(16), 16).longValue());
+		for (World w : Bukkit.getWorlds()) {
+			for (Entity e : w.getEntities()) {
+				if (e.getUniqueId().equals(uuid))
+					e.remove();
+			}
+		}
+		file.set("main_taxiLocation." + num, null);
+		file.set("deco_taxiLocation." + num, null);
+		data.saveConfig();
+
+		ArrayList<Location> locArr = new ArrayList<Location>();
+		ArrayList<ArmorStand> standArr = new ArrayList<ArmorStand>();
+		while (main_iter.hasNext()) { // main 택시 처리
+			int key = Integer.parseInt(main_iter.next());
+			if (key > num) { // 삭제 후 다시 정렬
+				locArr.add((Location) file.get("main_taxiLocation." + key + ".loc"));
+				standArr.add((ArmorStand) file.get("main_taxiLocation." + key + ".armorstand"));
+				file.set("main_taxiLocation." + key + ".loc", null);
+				file.set("main_taxiLocation." + key + ".armorstand", null);
+				data.saveConfig();
+			}
+		}
+		int cnt = num + 1;
+		for (int i = 0; i < locArr.size(); i++) {
+			file.set("main_taxiLocation." + cnt + ".loc", locArr.get(i));
+			data.saveConfig();
+			cnt++;
+		}
+
+		locArr.clear();
+		while (deco_iter.hasNext()) { // deco 택시 처리
+			int key = Integer.parseInt(deco_iter.next());
+			if (key > num) { // 삭제 후 다시 정렬
+				locArr.add((Location) file.get("deco_taxiLocation." + key + ".loc"));
+				file.set("deco_taxiLocation." + key + ".loc", null);
+				data.saveConfig();
+			}
+		}
+		cnt = num + 1;
+		for (int i = 0; i < locArr.size(); i++) {
+			file.set("deco_taxiLocation." + cnt + ".loc", locArr.get(i));
+			data.saveConfig();
+			cnt++;
+		}
+		p.sendMessage(ChatColor.GREEN + "성공적으로 위치 좌표를 제거하였습니다.");
+	}
+
+	public void setModelTaxi(Player p, int num) { // 택시 모델 아이템 지정 메서드
+		ItemStack item = p.getInventory().getItemInMainHand();
+		if (item == null || item.getType() == Material.AIR) {
+			p.sendMessage(ChatColor.RED + "맨손으로는 이 커맨드를 사용할 수 없습니다.");
+			return;
+		}
+		if (num == 1) {
+			file.set("main_taxi.item", item);
+			data.saveConfig();
+			p.sendMessage(ChatColor.GREEN + "성공적으로 메인택시 모델의 아이템이 등록되었습니다.");
+		} else if (num == 2) {
+			file.set("deco_taxi.item", item);
+			data.saveConfig();
+			p.sendMessage(ChatColor.GREEN + "성공적으로 데코택시 모델의 아이템이 등록되었습니다.");
+		}
+	}
+
+	private EulerAngle directionToEuler(Location dir) {
+		double xzLength = Math.sqrt(dir.getX() * dir.getX() + dir.getZ() * dir.getZ());
+		double pitch = Math.atan2(xzLength, dir.getY()) - Math.PI / 2;
+		double yaw = -Math.atan2(dir.getX(), dir.getZ()) + Math.PI / 4;
+		return new EulerAngle(pitch, yaw, 0);
+	}
+}
